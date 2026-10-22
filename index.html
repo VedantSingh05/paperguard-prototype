@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PaperGuard – Prototype</title>
+<style>
+:root{--ink:#0f1b33;--blue:#2f5bea;--blue2:#2349c4;--paper:#f2f4f9;--card:#fff;--line:#dde2ec;--muted:#5d687c;--ok:#12805c;--okbg:#e2f4ec;--warn:#a96a0b;--warnbg:#fcf0d9;--bad:#b42318;--badbg:#fce6e3}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.55 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif;background:var(--paper);color:var(--ink)}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;margin:0 0 .4rem;line-height:1.2;letter-spacing:-.01em}
+h1{font-size:2.1rem}h2{font-size:1.6rem}h3{font-size:1.1rem}
+p{margin:0 0 1rem;color:var(--muted)}
+header{background:var(--ink);color:#fff;padding:.8rem 1.5rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;border-bottom:3px solid var(--blue)}
+.brand{display:flex;align-items:center;gap:.6rem;font:700 1.3rem Georgia,serif;cursor:pointer}
+.brand svg{width:26px;height:26px}
+.who{font-size:.88rem;background:rgba(255,255,255,.12);padding:.25rem .8rem;border-radius:99px}
+.steps{display:flex;justify-content:center;gap:.3rem;padding:.9rem 1rem;background:#fff;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.steps span{display:flex;align-items:center;gap:.5rem;padding:.3rem .8rem .3rem .35rem;border-radius:99px;font-size:.86rem;color:var(--muted)}
+.steps span b{width:1.5rem;height:1.5rem;border-radius:50%;display:grid;place-items:center;font-size:.78rem;background:#e8ecf4;color:var(--muted)}
+.steps span.on{background:var(--ink);color:#fff}.steps span.on b{background:var(--blue);color:#fff}
+.steps span.done{cursor:pointer;color:var(--ink)}.steps span.done b{background:var(--okbg);color:var(--ok)}
+.steps span.done:hover{background:#eef1f8}
+main{max-width:940px;margin:1.6rem auto;padding:0 1rem}
+.screen{display:none}.screen.active{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1.5rem;margin-bottom:1rem;box-shadow:0 2px 8px rgba(15,27,51,.06)}
+label{display:block;font-weight:600;margin:.9rem 0 .3rem;font-size:.9rem}
+input,select{width:100%;padding:.65rem .8rem;border:1px solid #c6cedc;border-radius:8px;font:inherit;background:#fff}
+input:focus,select:focus{border-color:var(--blue);outline:3px solid rgba(47,91,234,.2)}
+button{display:inline-block;background:var(--blue);color:#fff;border:0;padding:.75rem 1.5rem;border-radius:8px;font:600 1rem inherit;cursor:pointer;margin-top:1rem;transition:background .15s,transform .1s,box-shadow .15s;box-shadow:0 2px 6px rgba(47,91,234,.3)}
+button:hover:not(:disabled){background:var(--blue2)}
+button:active:not(:disabled){transform:translateY(1px)}
+button.ghost{background:#fff;color:var(--ink);border:1px solid #b8c1d1;box-shadow:none}
+button.ghost:hover{background:#eef1f8}
+button:disabled{background:#aeb7c6;box-shadow:none;cursor:not-allowed}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.login{display:grid;grid-template-columns:1fr 1fr;border-radius:16px;overflow:hidden;box-shadow:0 8px 28px rgba(15,27,51,.14);margin-top:.5rem}
+.hero{background:var(--ink);color:#fff;padding:2.4rem 2rem;display:flex;flex-direction:column;justify-content:center}
+.hero svg{width:88px;height:88px;margin-bottom:1.2rem}
+.hero h1{font-size:1.9rem}.hero p{color:#b9c4dc}
+.hero ul{margin:.6rem 0 0;padding:0;list-style:none;color:#dbe3f5;font-size:.93rem}
+.hero li{padding:.25rem 0 .25rem 1.4rem;position:relative}
+.hero li::before{content:"✓";position:absolute;left:0;color:#5ee0aa;font-weight:700}
+.login .form{background:#fff;padding:2rem}
+.stats{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem}
+.stat{background:#fff;border:1px solid var(--line);border-radius:10px;padding:.55rem 1rem;font-size:.9rem}
+.stat strong{font:700 1.3rem Georgia,serif;margin-right:.35rem}
+table{width:100%;border-collapse:collapse;font-size:.93rem}
+th,td{text-align:left;padding:.75rem .6rem;border-bottom:1px solid var(--line);vertical-align:middle}
+th{color:var(--muted);font-weight:600;font-size:.84rem}
+tr:last-child td{border:0}
+tr+tr:hover td{background:#f6f8fc}
+td:first-child{font-weight:600}
+.tag{display:inline-block;padding:.2rem .7rem;border-radius:99px;font-size:.8rem;font-weight:600;white-space:nowrap}
+.t-ok{background:var(--okbg);color:var(--ok)}.t-warn{background:var(--warnbg);color:var(--warn)}.t-bad{background:var(--badbg);color:var(--bad)}
+.t-ok:not(.wait)::before{content:"✓ "}
+.tag.wait{background:#eef1f6;color:var(--muted)}
+.tag.wait::before{content:"";display:inline-block;width:.6rem;height:.6rem;margin-right:.4rem;border:2px solid #aab4c4;border-top-color:var(--ink);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-1px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.mini{margin:0;padding:.45rem 1rem;font-size:.9rem}
+.check{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:.8rem 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.check:last-child{border:0}
+code{font:.82rem Consolas,monospace;background:#eef1f7;padding:.15rem .45rem;border-radius:5px;word-break:break-all}
+.verdict{background:var(--okbg);border:1px solid #8fd1b5;color:var(--ok);padding:1rem 1.2rem;border-radius:12px;font-weight:700;font-size:1.1rem;transition:opacity .35s}
+.verdict.hide{opacity:0}
+.row{display:flex;gap:1.5rem;flex-wrap:wrap}.row>*{flex:1;min-width:230px}
+.qr{width:128px;height:128px;border:6px solid #fff;outline:1px solid var(--line);border-radius:6px;background:conic-gradient(var(--ink) 25%,#fff 0 50%,var(--ink) 0 75%,#fff 0) 0 0/24px 24px}
+.btns{display:flex;gap:.6rem;flex-wrap:wrap}
+.note{font-size:.82rem;color:var(--muted);margin-top:1rem}
+.tick{width:64px;height:64px;border-radius:50%;background:var(--okbg);color:var(--ok);display:grid;place-items:center;font-size:2rem;font-weight:700;margin-bottom:.9rem}
+.receipt{max-width:560px;margin:1rem auto}
+@media(max-width:700px){.login{grid-template-columns:1fr}.hero{padding:1.6rem}}
+@media(prefers-reduced-motion:no-preference){.screen.active{animation:in .3s ease-out}@keyframes in{from{opacity:0}to{opacity:1}}.tick{animation:pop .4s ease-out}@keyframes pop{from{transform:scale(.5)}to{transform:scale(1)}}}
+</style>
+</head>
+<body>
+<header>
+<div class="brand" id="brand" title="Go to dashboard">
+<svg viewBox="0 0 32 32" fill="none"><path d="M16 2l11 4v9c0 7-4.5 12.5-11 15C9.5 27.5 5 22 5 15V6l11-4z" fill="#2f5bea"/><path d="M11 16l4 4 7-8" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>PaperGuard</div>
+<div class="who" id="who">Not signed in</div>
+</header>
+<nav class="steps" aria-label="Progress">
+<span data-s="1"><b>1</b>Sign in</span><span data-s="2"><b>2</b>Dashboard</span><span data-s="3"><b>3</b>Verify paper</span><span data-s="4"><b>4</b>Print review</span><span data-s="5"><b>5</b>Done</span>
+</nav>
+<main>
+
+<!-- Screen 1 -->
+<section class="screen active" id="s1">
+<div class="login">
+<div class="hero">
+<svg viewBox="0 0 32 32" fill="none"><path d="M16 2l11 4v9c0 7-4.5 12.5-11 15C9.5 27.5 5 22 5 15V6l11-4z" fill="#2f5bea"/><path d="M11 16l4 4 7-8" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<h1>Every paper checked before it is printed.</h1>
+<p>Secure question paper delivery for examination centres.</p>
+<ul><li>Tamper check with SHA-256</li><li>Signed by the examination authority</li><li>Released only at the scheduled time</li><li>QR code on every printed batch</li></ul>
+</div>
+<div class="form">
+<h2>Centre sign-in</h2>
+<p>Use your staff ID to see the papers assigned to your centre.</p>
+<label for="u">Staff ID</label><input id="u" value="STF-2041">
+<label for="p">Password</label><input id="p" type="password" value="password">
+<label for="c">Examination centre</label>
+<select id="c"><option>DBIT Centre – Mumbai (C-017)</option><option>Centre B – Pune (C-023)</option></select>
+<label for="o">One-time password (sent to your phone)</label><input id="o" value="482915" inputmode="numeric">
+<button onclick="signIn(this)">Log in</button>
+<p class="note">Prototype: all data is dummy. No real papers are used.</p>
+</div>
+</div>
+</section>
+
+<!-- Screen 2 -->
+<section class="screen" id="s2">
+<h2>Papers for your centre</h2>
+<p>Only papers assigned to centre C-017 are listed. Papers unlock at their scheduled release time.</p>
+<div class="stats"><div class="stat"><strong>1</strong>ready to print</div><div class="stat"><strong>1</strong>scheduled</div><div class="stat"><strong>1</strong>revoked</div></div>
+<div class="card"><table>
+<tr><th>Paper ID</th><th>Examination</th><th>Date and release time</th><th>Status</th><th></th></tr>
+<tr><td>PG-2026-0142</td><td>Data Structures (SEM-III)</td><td>24 Oct 2026, 08:30</td><td><span class="tag t-ok">Released</span></td><td><button class="mini" onclick="go(3)">Open paper</button></td></tr>
+<tr><td>PG-2026-0143</td><td>Digital Logic (SEM-III)</td><td>26 Oct 2026, 08:30</td><td><span class="tag t-warn">Not yet released</span></td><td><button class="mini" disabled>Locked</button></td></tr>
+<tr><td>PG-2026-0121</td><td>Mathematics III (SEM-III)</td><td>20 Oct 2026, 08:30</td><td><span class="tag t-bad">Revoked</span></td><td><button class="mini" disabled>Blocked</button></td></tr>
+</table></div>
+</section>
+
+<!-- Screen 3 -->
+<section class="screen" id="s3">
+<h2>Verify paper PG-2026-0142</h2>
+<p>Data Structures (SEM-III) · Centre C-017. The paper can be printed only if every check passes.</p>
+<div class="card">
+<div class="check"><span>Hash comparison (SHA-256)</span><span class="tag t-ok vt">Match</span></div>
+<div class="check"><span>Expected hash</span><code>9f2c4ab71e08d3c5…b1e60a47</code></div>
+<div class="check"><span>Calculated hash</span><code>9f2c4ab71e08d3c5…b1e60a47</code></div>
+<div class="check"><span>Digital signature (Examination Authority)</span><span class="tag t-ok vt">Valid</span></div>
+<div class="check"><span>Centre authorization</span><span class="tag t-ok vt">C-017 authorized</span></div>
+<div class="check"><span>Release time</span><span class="tag t-ok vt">Released at 08:30</span></div>
+<div class="check"><span>Revocation status</span><span class="tag t-ok vt">Not revoked</span></div>
+</div>
+<div class="verdict hide" id="vd">Verified – this paper is authentic and unchanged.</div>
+<div class="btns"><button class="ghost" onclick="go(2)">Back to dashboard</button><button id="cont" onclick="go(4)" disabled>Continue to print</button></div>
+</section>
+
+<!-- Screen 4 -->
+<section class="screen" id="s4">
+<h2>Review print job</h2>
+<p>Check the details below. Each printed batch gets its own QR code linked to a server record.</p>
+<div class="card row">
+<div>
+<div class="check"><span>Paper ID</span><strong>PG-2026-0142</strong></div>
+<div class="check"><span>Examination</span><strong>Data Structures</strong></div>
+<div class="check"><span>Centre</span><strong>C-017</strong></div>
+<label for="n">Number of copies</label><input id="n" type="number" value="120" min="1" max="200">
+<p class="note">Print count is recorded in the audit log.</p>
+</div>
+<div><h3>Batch QR preview</h3><div class="qr" role="img" aria-label="Sample QR code"></div>
+<p class="note">Batch ID: PG-2026-0142-B01<br>Scanning shows the paper's recorded status.</p></div>
+</div>
+<div class="btns"><button class="ghost" onclick="go(3)">Back to verification</button><button class="ghost" onclick="go(2)">Back to dashboard</button><button id="pb" onclick="doPrint(this)">Confirm and print</button></div>
+</section>
+
+<!-- Screen 5 -->
+<section class="screen" id="s5">
+<div class="card receipt">
+<div class="tick" aria-hidden="true">✓</div>
+<h1>Print recorded</h1>
+<p>Your print job was sent and logged. Staff can scan the QR code on any printed paper to check its status.</p>
+<div class="check"><span>Paper ID</span><strong>PG-2026-0142</strong></div>
+<div class="check"><span>Batch ID</span><strong>PG-2026-0142-B01</strong></div>
+<div class="check"><span>Copies printed</span><strong id="cp">120</strong></div>
+<div class="check"><span>Audit log entry</span><code>LOG-88314 · print · STF-2041 · C-017</code></div>
+<div class="check"><span>Status</span><span class="tag t-ok">Verified and printed</span></div>
+<button onclick="go(2)">Return to dashboard</button>
+</div>
+</section>
+
+</main>
+<script>
+let reached=1,vTimer=[];
+function signIn(b){b.disabled=true;b.textContent='Checking one-time password…';setTimeout(()=>{go(2);b.disabled=false;b.textContent='Log in'},800)}
+function doPrint(b){b.disabled=true;b.textContent='Sending to printer…';setTimeout(()=>{go(5);b.disabled=false;b.textContent='Confirm and print'},1000)}
+function runVerify(){
+  vTimer.forEach(clearTimeout);vTimer=[];
+  const tags=[...document.querySelectorAll('.vt')],vd=document.getElementById('vd'),c=document.getElementById('cont');
+  vd.classList.add('hide');c.disabled=true;
+  tags.forEach(t=>{if(!t.dataset.t){t.dataset.t=t.textContent;t.dataset.c=t.className}t.className='tag wait vt';t.textContent='Checking…'});
+  tags.forEach((t,i)=>vTimer.push(setTimeout(()=>{t.className=t.dataset.c;t.textContent=t.dataset.t},450*(i+1))));
+  vTimer.push(setTimeout(()=>{vd.classList.remove('hide');c.disabled=false},450*(tags.length+1)));
+}
+function go(n){
+  reached=Math.max(reached,n);
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s'+n).classList.add('active');
+  document.querySelectorAll('.steps span').forEach(t=>{const k=+t.dataset.s;t.classList.toggle('on',k===n);t.classList.toggle('done',k!==n&&k>1&&k<=reached);t.tabIndex=(k>1&&k<=reached)?0:-1;});
+  document.getElementById('who').textContent=n>1?'STF-2041 · Centre C-017':'Not signed in';
+  if(n===3)runVerify();
+  if(n===5)document.getElementById('cp').textContent=document.getElementById('n').value||'0';
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('.steps span').forEach(t=>{
+  const k=+t.dataset.s;
+  const jump=()=>{if(k>1&&k<=reached)go(k)};
+  t.addEventListener('click',jump);
+  t.addEventListener('keydown',e=>{if(e.key==='Enter')jump()});
+});
+document.getElementById('brand').addEventListener('click',()=>{if(reached>1)go(2)});
+go(1);
+</script>
+</body>
+</html>
